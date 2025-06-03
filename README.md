@@ -1,0 +1,1 @@
+# loyverse-sales-reports
