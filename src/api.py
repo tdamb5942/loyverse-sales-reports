@@ -13,22 +13,31 @@ load_dotenv()
 LOYVERSE_API_BASE_URL = "https://api.loyverse.com/v1.0"
 
 
-def _get_access_token() -> str:
+def _get_access_token(path: str = "secrets/token.json") -> str:
     """
     Reads the access token from a local file with error handling.
+
+    Args:
+        path (str): Optional path to token file. Defaults to "secrets/token.json".
+
+    Returns:
+        str: Access token value.
+
+    Raises:
+        FileNotFoundError: If the token file is missing.
+        ValueError: If the file contains invalid JSON.
+        KeyError: If the token is not found in the JSON.
     """
     try:
-        with open("secrets/token.json", "r") as f:
+        with open(path, "r") as f:
             data = json.load(f)
             if "access_token" not in data:
                 raise KeyError("access_token not found in token file")
             return data["access_token"]
     except FileNotFoundError:
-        raise FileNotFoundError(
-            "secrets/token.json not found. Please run authorization first."
-        )
+        raise FileNotFoundError(f"{path} not found. Please run authorization first.")
     except json.JSONDecodeError:
-        raise ValueError("Invalid JSON in secrets/token.json file")
+        raise ValueError(f"Invalid JSON in {path} file")
 
 
 def _get_auth_headers() -> dict:
