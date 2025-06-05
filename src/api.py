@@ -132,7 +132,7 @@ def authorize():
     redirect_uri = os.getenv("LOYVERSE_REDIRECT_URI")
     if not redirect_uri:
         raise RuntimeError("Missing LOYVERSE_REDIRECT_URI in environment")
-    scope = "RECEIPTS_READ"
+    scope = "RECEIPTS_READ ITEMS_READ"
 
     class OAuthHandler(BaseHTTPRequestHandler):
         def do_GET(self):
