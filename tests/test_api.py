@@ -3,10 +3,8 @@ from src.api import (
     _get_auth_headers,
     _generate_auth_url,
     _exchange_auth_code_for_token,
-    fetch_all_receipts,
 )
 from unittest.mock import patch, mock_open, MagicMock
-import pandas as pd
 import pytest
 
 
@@ -62,31 +60,6 @@ def test_get_auth_headers_returns_expected_dict():
         headers = _get_auth_headers()
         assert headers["Authorization"] == "Bearer test-token"
         assert headers["Content-Type"] == "application/json"
-
-
-# Tests that the receipts API call returns a DataFrame and parses results correctly.
-def test_fetch_all_receipts_returns_dataframe():
-    mock_data = {
-        "receipts": [
-            {"receipt_number": "123", "total_money": 100},
-            {"receipt_number": "124", "total_money": 200},
-        ],
-        "cursor": None,
-    }
-
-    with patch(
-        "src.api._get_auth_headers", return_value={"Authorization": "Bearer test"}
-    ):
-        with patch(
-            "httpx.get",
-            return_value=MagicMock(
-                json=lambda: mock_data, raise_for_status=lambda: None
-            ),
-        ):
-            df = fetch_all_receipts("2025-01-01T00:00:00Z", "2025-01-02T00:00:00Z")
-            assert isinstance(df, pd.DataFrame)
-            assert len(df) == 2
-            assert set(df.columns) >= {"receipt_number", "total_money"}
 
 
 # Tests that the generated OAuth URL contains the correct query parameters.

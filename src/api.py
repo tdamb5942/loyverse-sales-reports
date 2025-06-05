@@ -2,15 +2,12 @@ import threading
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from urllib.parse import urlparse, parse_qs
 import httpx
-import pandas as pd
 import json
 import webbrowser
 from dotenv import load_dotenv
 import os
 
 load_dotenv()
-
-LOYVERSE_API_BASE_URL = "https://api.loyverse.com/v1.0"
 
 
 def _get_access_token(path: str = "secrets/token.json") -> str:
@@ -49,33 +46,6 @@ def _get_auth_headers() -> dict:
         "Authorization": f"Bearer {access_token}",
         "Content-Type": "application/json",
     }
-
-
-def fetch_all_receipts(start_date: str, end_date: str) -> pd.DataFrame:
-    """
-    Fetches all receipts from the Loyverse API in a date range.
-
-    Handles pagination and returns a pandas DataFrame. Used for reporting.
-    """
-    url = f"{LOYVERSE_API_BASE_URL}/receipts"
-    headers = _get_auth_headers()
-    params = {"created_at_min": start_date, "created_at_max": end_date, "limit": 250}
-
-    receipts = []
-    while True:
-        response = httpx.get(url, headers=headers, params=params, timeout=30.0)
-        response.raise_for_status()
-        data = response.json()
-
-        receipts.extend(data.get("receipts", []))
-        cursor = data.get("cursor")
-
-        if not cursor:
-            break
-
-        params["cursor"] = cursor
-
-    return pd.DataFrame(receipts)
 
 
 def _generate_auth_url(client_id: str, redirect_uri: str, scope: str) -> str:
