@@ -1,4 +1,4 @@
-from api import _get_auth_headers
+from src.api import _get_auth_headers
 import httpx
 import pandas as pd
 
@@ -65,3 +65,15 @@ def fetch_all_categories() -> pd.DataFrame:
     response = httpx.get(url, headers=headers, timeout=30.0)
     response.raise_for_status()
     return pd.DataFrame(response.json().get("categories", []))
+
+
+def get_items_with_categories() -> pd.DataFrame:
+    """
+    Returns a DataFrame of items with their corresponding category names.
+    """
+    items_df = fetch_all_items()
+    categories_df = fetch_all_categories()
+    categories_df = categories_df.rename(
+        columns={"id": "category_id", "name": "category_name"}
+    )
+    return items_df.merge(categories_df, on="category_id", how="left")
