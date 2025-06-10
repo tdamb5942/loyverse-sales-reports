@@ -1,4 +1,5 @@
-from api import _get_auth_headers
+from datetime import datetime
+from src.api import _get_auth_headers
 import httpx
 import pandas as pd
 
@@ -13,7 +14,11 @@ def fetch_all_receipts(start_date: str, end_date: str) -> pd.DataFrame:
     """
     url = f"{LOYVERSE_API_BASE_URL}/receipts"
     headers = _get_auth_headers()
-    params = {"created_at_min": start_date, "created_at_max": end_date, "limit": 250}
+    params = {
+        "created_at_min": datetime.fromisoformat(start_date).isoformat() + "Z",
+        "created_at_max": datetime.fromisoformat(end_date).isoformat() + "Z",
+        "limit": 250,
+    }
 
     receipts = []
     while True:
@@ -65,3 +70,18 @@ def fetch_all_categories() -> pd.DataFrame:
     response = httpx.get(url, headers=headers, timeout=30.0)
     response.raise_for_status()
     return pd.DataFrame(response.json().get("categories", []))
+
+
+def get_items_with_categories() -> pd.DataFrame:
+    """
+    Returns a DataFrame of items with their corresponding category names.
+    """
+    items_df = fetch_all_items()
+    categories_df = fetch_all_categories()
+    categories_df = categories_df.rename(
+        columns={"id": "category_id", "name": "category_name"}
+    )
+
+    items_with_categories = items_df.merge(categories_df, on="category_id", how="left")
+
+    return items_with_categories

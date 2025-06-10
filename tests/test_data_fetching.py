@@ -1,4 +1,4 @@
-from data_fetching import fetch_all_receipts, fetch_all_items, fetch_all_categories
+from src.data_fetching import fetch_all_receipts, fetch_all_items, fetch_all_categories
 from unittest.mock import patch, MagicMock
 import pandas as pd
 
